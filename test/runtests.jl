@@ -5,6 +5,7 @@ import Calculus
 include("testtransforms.jl")
 include("diagonaltest.jl")
 include("laplaciantest.jl")
+include("rhstest.jl")
 
 #=
 q2 = quote
@@ -35,9 +36,17 @@ q3 = quote
 		#LinearAdjoints.addentry(I, J, V, 1, 2, a ^ 3 + exp(c[1 - 1 + 1]))
 	end
 end
+q = :(b[1] = a[1] ^ 2 + sqrt(c[end - 1 + 1]))
+q4 = quote
+	@LinearAdjoints.assemblevector (a, c) b function f(a, c)
+		b = Array(Float64, 1)
+		$q
+		b[end] = 1
+		return b
+	end
+end
 macroexpand(q3)
 #eval(q3)
-eval(q2)
+#eval(q2)
 #LinearAdjoints.adjointsparsematrix(:(LinearAdjoints.addentry(I, J, V, 1, 2, a[1])))
 =#
-
