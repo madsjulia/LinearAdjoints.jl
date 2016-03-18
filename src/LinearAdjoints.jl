@@ -39,4 +39,23 @@ function writegetlinearindex(vars::Vector)
 	return gli
 end
 
+macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_x_symbol, objfunc_p_symbol)
+	q = quote
+		function $name(args...)
+			A = $assemble_A_func_symbol(args...)
+			b = $assemble_b_func_symbol(args...)
+			A2 = copy(A)
+			Af = factorize(A)
+			x = Af \ b
+			g_x = $objfunc_x_symbol(x, args...)
+			lambda = Af' \ g_x
+			A_px = $(parse(string(assemble_A_func_symbol, "_px")))(x, args...)
+			b_p = $(parse(string(assemble_b_func_symbol, "_p")))(args...)
+			gradient = (b_p - A_px) * lambda + $objfunc_p_symbol(x, args...)
+			return x, gradient
+		end
+	end
+	return :($(esc(q)))
+end
+
 end

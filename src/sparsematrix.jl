@@ -17,8 +17,8 @@ function adjointsparsematrix(ex::Expr, vars, solutionsymbol)
 				thisex.args[2] = specialsymbolI
 				thisex.args[3] = specialsymbolJ
 				thisex.args[4] = specialsymbolV
-				thisex.args[6] = thisex.args[5]#the row gives the equation in the A matrix, but the column gives the equation in A_px
 				thisex.args[end] = :(($(thisex.args[end])) * $solutionsymbol[$(thisex.args[6])])
+				thisex.args[6] = thisex.args[5]#the row gives the equation in the A matrix, but the column gives the equation in A_px
 				splitstring = split(string(tvars[i]), specialrefstring)
 				thisvarname = splitstring[1]
 				thisvar = symbol(thisvarname)

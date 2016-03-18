@@ -6,6 +6,7 @@ include("testtransforms.jl")
 include("diagonaltest.jl")
 include("laplaciantest.jl")
 include("rhstest.jl")
+include("fulladjointtest.jl")
 
 #=
 q2 = quote

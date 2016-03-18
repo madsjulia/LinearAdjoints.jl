@@ -15,8 +15,8 @@ A = laplacian(pi, n)
 @test A == spdiagm((fill(pi, n - 1), fill(-2 * pi, n), fill(pi, n - 1)), (-1, 0, 1))
 x = rand(10)
 A_px = laplacian_px(x, pi, n)
-@test A_px[1, 1] == -x[1]
-@test A_px[1, end] == -x[end]
+@test A_px[1, 1] == -2 * x[1] + x[2]
+@test A_px[1, end] == -2 * x[end] + x[end - 1]
 for i = 2:n - 1
-	@test A_px[1, i] == 0.
+	@test A_px[1, i] == x[i - 1] - 2 * x[i] + x[i + 1]
 end
