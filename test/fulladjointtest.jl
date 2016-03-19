@@ -22,7 +22,8 @@ end
 	return sparse(I, J, V)
 end
 const k0 = float(pi)
-xs = linspace(0, 1, length(h) + 2)[2:end - 1]
+n = 10
+xs = linspace(0, 1, n + 2)[2:end - 1]
 const hobs = randn(length(xs))
 function objfunc(x)
 	k = x[1]
@@ -43,7 +44,6 @@ function objfunc_p(h, k, f)
 	return result
 end
 @LinearAdjoints.adjoint handgrad laplacian rhs objfunc_h objfunc_p
-n = 10
 k = k0
 gwsink = fill(-2 * k0, n)
 h, grad = handgrad(k, gwsink)
