@@ -1,5 +1,5 @@
 function adjointvector(ex::Expr, vars, vectorsymbol)
-	if ex.head == :(=) && isa(ex.args[1], Expr) && ex.args[1].head == :ref && ex.args[1].args[1] == vectorsymbol
+	if (ex.head == :(=) || ex.head == :+=) && isa(ex.args[1], Expr) && ex.args[1].head == :ref && ex.args[1].args[1] == vectorsymbol
 		lhs, tvectorsymbol = transformrefs(ex.args[1], [vectorsymbol])
 		splitstring = split(string(lhs), specialrefstring)
 		vectorindexex = MetaProgTools.replacesymbol(parse(string("throwaway[", splitstring[2], "]")).args[2], :end, :(length($vectorsymbol)))#this throwaway[...] business is needed because parse("end") gives an error

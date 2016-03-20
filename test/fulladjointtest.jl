@@ -39,4 +39,5 @@ end
 @LinearAdjoints.adjoint handgrad laplacian rhs objfunc objfunc_h objfunc_p
 k = k0
 gwsink = fill(-2 * k0, n)
+LinearAdjoints.testassembleb_p(rhs, rhs_p, [true, true], k, gwsink)
 LinearAdjoints.testadjoint(handgrad, [true, true], k, gwsink)

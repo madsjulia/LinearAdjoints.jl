@@ -61,30 +61,27 @@ macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_symb
 	return :($(esc(q)))
 end
 
-function testadjoint(adjointfunc, diffargs::Array{Bool, 1}, args...; tol=100*sqrt(eps(Float64)))
-	@assert length(diffargs) == length(args)
-	u, of, gradient = adjointfunc(args...)
-	function ofwithvectorargs(x)
-		thisargs = Array(Any, length(args))
-		for i = 1:length(args)
-			thisargs[i] = deepcopy(args[i])
-		end
-		i = 1
-		for j = 1:length(diffargs)
-			if diffargs[j]
-				temp = x[i:i + length(args[j]) - 1]
-				if isa(thisargs[j], Number)
-					thisargs[j] = temp[1]
-				else
-					thisargs[j] = reshape(temp, size(args[j]))
-				end
-				i += length(args[j])
-			end
-		end
-		u, of, gradient = adjointfunc(thisargs...)
-		return of
+function vectorargs2args(x, diffargs, args...)
+	thisargs = Array(Any, length(args))
+	for i = 1:length(args)
+		thisargs[i] = deepcopy(args[i])
 	end
-	fdgradient = FDDerivatives.makegradient(ofwithvectorargs)
+	i = 1
+	for j = 1:length(diffargs)
+		if diffargs[j]
+			temp = x[i:i + length(args[j]) - 1]
+			if isa(thisargs[j], Number)
+				thisargs[j] = temp[1]
+			else
+				thisargs[j] = reshape(temp, size(args[j]))
+			end
+			i += length(args[j])
+		end
+	end
+	return thisargs
+end
+
+function args2vectorargs(diffargs, args...)
 	numparams = 0
 	for i = 1:length(diffargs)
 		if diffargs[i]
@@ -99,6 +96,34 @@ function testadjoint(adjointfunc, diffargs::Array{Bool, 1}, args...; tol=100*sqr
 			j += length(args[i])
 		end
 	end
+	return x
+end
+
+function testassembleb_p(assembleb, assembleb_p, diffargs::Array{Bool, 1}, args...; tol=100*sqrt(eps(Float64)))
+	@assert length(diffargs) == length(args)
+	b_p = assembleb_p(args...)
+	assembleb_pvectorargs(x) = vec(full(assembleb(vectorargs2args(x, diffargs, args...)...)))
+	J = FDDerivatives.makejacobian(assembleb_pvectorargs)
+	fdassembleb_p(x) = J(x)'
+	fdb_p = fdassembleb_p(args2vectorargs(diffargs, args...))
+	@assert size(fdb_p) == size(b_p)
+	for i = 1:size(fdb_p, 1)
+		for j = 1:size(fdb_p, 2)
+			@Base.Test.test_approx_eq_eps fdb_p[i, j] b_p[i, j] tol
+		end
+	end
+end
+
+function testadjoint(adjointfunc, diffargs::Array{Bool, 1}, args...; tol=100*sqrt(eps(Float64)))
+	@assert length(diffargs) == length(args)
+	u, of, gradient = adjointfunc(args...)
+	function ofwithvectorargs(x)
+		thisargs = vectorargs2args(x, diffargs, args...)
+		u, of, gradient = adjointfunc(thisargs...)
+		return of
+	end
+	fdgradient = FDDerivatives.makegradient(ofwithvectorargs)
+	x = args2vectorargs(diffargs, args...)
 	fdgrad = fdgradient(x)
 	@assert length(gradient) == length(fdgrad)
 	@assert length(gradient) == length(x)
