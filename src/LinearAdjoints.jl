@@ -1,6 +1,8 @@
 module LinearAdjoints
 
+import Base.Test
 import MetaProgTools
+import FDDerivatives
 
 const specialsymbolI = :___la___I
 const specialsymbolJ = :___la___J
@@ -39,7 +41,7 @@ function writegetlinearindex(vars::Vector)
 	return gli
 end
 
-macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_x_symbol, objfunc_p_symbol)
+macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_symbol, objfunc_x_symbol, objfunc_p_symbol)
 	q = quote
 		function $name(args...)
 			A = $assemble_A_func_symbol(args...)
@@ -52,10 +54,57 @@ macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_x_sy
 			A_px = $(parse(string(assemble_A_func_symbol, "_px")))(x, args...)
 			b_p = $(parse(string(assemble_b_func_symbol, "_p")))(args...)
 			gradient = (b_p - A_px) * lambda + $objfunc_p_symbol(x, args...)
-			return x, gradient
+			of = $objfunc_symbol(x, args...)
+			return x, of, gradient
 		end
 	end
 	return :($(esc(q)))
+end
+
+function testadjoint(adjointfunc, diffargs::Array{Bool, 1}, args...; tol=100*sqrt(eps(Float64)))
+	@assert length(diffargs) == length(args)
+	u, of, gradient = adjointfunc(args...)
+	function ofwithvectorargs(x)
+		thisargs = Array(Any, length(args))
+		for i = 1:length(args)
+			thisargs[i] = deepcopy(args[i])
+		end
+		i = 1
+		for j = 1:length(diffargs)
+			if diffargs[j]
+				temp = x[i:i + length(args[j]) - 1]
+				if isa(thisargs[j], Number)
+					thisargs[j] = temp[1]
+				else
+					thisargs[j] = reshape(temp, size(args[j]))
+				end
+				i += length(args[j])
+			end
+		end
+		u, of, gradient = adjointfunc(thisargs...)
+		return of
+	end
+	fdgradient = FDDerivatives.makegradient(ofwithvectorargs)
+	numparams = 0
+	for i = 1:length(diffargs)
+		if diffargs[i]
+			numparams += length(args[i])
+		end
+	end
+	x = Array(Float64, numparams)
+	j = 1
+	for i = 1:length(args)
+		if diffargs[i]
+			x[j:j + length(args[i]) - 1] = args[i]
+			j += length(args[i])
+		end
+	end
+	fdgrad = fdgradient(x)
+	@assert length(gradient) == length(fdgrad)
+	@assert length(gradient) == length(x)
+	for i = 1:length(x)
+		@Base.Test.test_approx_eq_eps fdgrad[i] gradient[i] tol
+	end
 end
 
 end

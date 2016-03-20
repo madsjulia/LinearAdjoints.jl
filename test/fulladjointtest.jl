@@ -25,13 +25,6 @@ const k0 = float(pi)
 n = 10
 xs = linspace(0, 1, n + 2)[2:end - 1]
 const hobs = randn(length(xs))
-function objfunc(x)
-	k = x[1]
-	f = x[2:end]
-	h, _ = handgrad(k, f)
-	return objfunc(h, k, f)
-end
-objfunc_fdgrad = FDDerivatives.makegradient(objfunc)
 function objfunc(h, k, f)
 	return sum((h - hobs) .^ 2) + (k - k0) ^ 2
 end
@@ -43,9 +36,7 @@ function objfunc_p(h, k, f)
 	result[1] = 2 * (k - k0)
 	return result
 end
-@LinearAdjoints.adjoint handgrad laplacian rhs objfunc_h objfunc_p
+@LinearAdjoints.adjoint handgrad laplacian rhs objfunc objfunc_h objfunc_p
 k = k0
 gwsink = fill(-2 * k0, n)
-h, grad = handgrad(k, gwsink)
-fdgrad = objfunc_fdgrad([k; gwsink])
-@test_approx_eq_eps fdgrad grad sqrt(eps(Float64)) * 100
+LinearAdjoints.testadjoint(handgrad, [true, true], k, gwsink)
