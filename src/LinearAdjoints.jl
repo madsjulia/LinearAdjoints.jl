@@ -42,20 +42,46 @@ function writegetlinearindex(vars::Vector)
 end
 
 macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_symbol, objfunc_x_symbol, objfunc_p_symbol)
-	q = quote
-		function $name(args...)
-			A = $assemble_A_func_symbol(args...)
-			b = $assemble_b_func_symbol(args...)
-			A2 = copy(A)
-			Af = factorize(A)
-			x = Af \ b
-			g_x = $objfunc_x_symbol(x, args...)
-			lambda = Af' \ g_x
-			A_px = $(parse(string(assemble_A_func_symbol, "_px")))(x, args...)
-			b_p = $(parse(string(assemble_b_func_symbol, "_p")))(args...)
-			gradient = (b_p - A_px) * lambda + $objfunc_p_symbol(x, args...)
-			of = $objfunc_symbol(x, args...)
-			return x, of, gradient
+	if isa(objfunc_symbol, Symbol)#they want a gradient
+		q = quote
+			function $name(args...)
+				A = $assemble_A_func_symbol(args...)
+				b = $assemble_b_func_symbol(args...)
+				Af = factorize(A)
+				x = Af \ b
+				g_x = $objfunc_x_symbol(x, args...)
+				lambda = vec(Af' \ g_x)
+				A_px = $(parse(string(assemble_A_func_symbol, "_px")))(x, args...)
+				b_p = $(parse(string(assemble_b_func_symbol, "_p")))(args...)
+				gradient = (b_p - A_px) * lambda + $objfunc_p_symbol(x, args...)
+				of = $objfunc_symbol(x, args...)
+				return x, of, gradient
+			end
+		end
+	elseif objfunc_symbol.head == :tuple#they want a jacobian
+		q = quote
+			function $name(args...)
+				A = $assemble_A_func_symbol(args...)
+				b = $assemble_b_func_symbol(args...)
+				Af = factorize(A)
+				x = Af \ b
+				gradients = Array(Array{Float64, 1}, $(length(objfunc_symbol.args)))
+				ofs = Array(Float64, $(length(objfunc_symbol.args)))
+				objfuncs = [$(objfunc_symbol.args...)]
+				objfunc_xs = [$(objfunc_x_symbol.args...)]
+				objfunc_ps = [$(objfunc_p_symbol.args...)]
+				for i = 1:$(length(objfunc_symbol.args))
+					g_x = objfunc_xs[i](x, args...)
+					lambda = vec(Af' \ g_x)
+					A_px = $(parse(string(assemble_A_func_symbol, "_px")))(x, args...)
+					b_p = $(parse(string(assemble_b_func_symbol, "_p")))(args...)
+					gradient = (b_p - A_px) * lambda + objfunc_ps[i](x, args...)
+					gradients[i] = gradient
+					of = objfuncs[i](x, args...)
+					ofs[i] = of
+				end
+				return x, ofs, gradients
+			end
 		end
 	end
 	return :($(esc(q)))

@@ -36,8 +36,34 @@ function objfunc_p(h, k, f)
 	result[1] = 2 * (k - k0)
 	return result
 end
-@LinearAdjoints.adjoint handgrad laplacian rhs objfunc objfunc_h objfunc_p
+@LinearAdjoints.adjoint h_and_grad laplacian rhs objfunc objfunc_h objfunc_p
 k = k0
 gwsink = fill(-2 * k0, n)
 LinearAdjoints.testassembleb_p(rhs, rhs_p, [true, true], k, gwsink)
-LinearAdjoints.testadjoint(handgrad, [true, true], k, gwsink)
+LinearAdjoints.testadjoint(h_and_grad, [true, true], k, gwsink)
+
+#test jacobian code
+function objfunc2(h, k, f)
+	return (h[1] - hobs[1]) ^ 2 + (k[1] - k0[1]) ^ 2
+end
+function objfunc_h2(h, k, f)
+	retval = zeros(length(h))
+	retval[1] = 2 * (h[1] - hobs[1])
+	return retval
+end
+function objfunc_p2(h, k, f)
+	result = zeros(1 + length(f))
+	result[1] = 2 * (k[1] - k0[1])
+	return result
+end
+@LinearAdjoints.adjoint h_and_grad2 laplacian rhs objfunc2 objfunc_h2 objfunc_p2
+@LinearAdjoints.adjoint h_and_jac laplacian rhs (objfunc, objfunc2) (objfunc_h, objfunc_h2) (objfunc_p, objfunc_p2)
+x1, of1, gradient1 = h_and_grad(k, gwsink)
+x2, of2, gradient2 = h_and_grad2(k, gwsink)
+x, ofs, gradients = h_and_jac(k, gwsink)
+@test x1 == x2
+@test x == x2
+@test of1 == ofs[1]
+@test of2 == ofs[2]
+@test gradient1 == gradients[1]
+@test gradient2 == gradients[2]
