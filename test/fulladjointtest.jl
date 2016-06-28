@@ -58,9 +58,12 @@ function objfunc_p2(h, k, f)
 end
 @LinearAdjoints.adjoint h_and_grad2 laplacian rhs objfunc2 objfunc_h2 objfunc_p2
 @LinearAdjoints.adjoint h_and_jac laplacian rhs (objfunc, objfunc2) (objfunc_h, objfunc_h2) (objfunc_p, objfunc_p2)
+@LinearAdjoints.solve h_grid laplacian rhs
+xsolve = h_grid(k, gwsink)
 x1, of1, gradient1 = h_and_grad(k, gwsink)
 x2, of2, gradient2 = h_and_grad2(k, gwsink)
 x, ofs, gradients = h_and_jac(k, gwsink)
+@test xsolve == x
 @test x1 == x2
 @test x == x2
 @test of1 == ofs[1]

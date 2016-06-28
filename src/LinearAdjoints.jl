@@ -41,6 +41,19 @@ function writegetlinearindex(vars::Vector)
 	return gli
 end
 
+macro solve(name, assemble_A_func_symbol, assemble_b_func_symbol)
+	q = quote
+		function $name(args...)
+			A = $assemble_A_func_symbol(args...)
+			b = $assemble_b_func_symbol(args...)
+			Af = factorize(A)
+			x = Af \ b
+			return x
+		end
+	end
+	return :($(esc(q)))
+end
+
 macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_symbol, objfunc_x_symbol, objfunc_p_symbol)
 	if isa(objfunc_symbol, Symbol)#they want a gradient
 		q = quote
