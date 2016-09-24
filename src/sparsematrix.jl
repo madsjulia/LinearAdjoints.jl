@@ -21,7 +21,7 @@ function adjointsparsematrix(ex::Expr, vars, solutionsymbol)
 				thisex.args[6] = thisex.args[5]#the row gives the equation in the A matrix, but the column gives the equation in A_px
 				splitstring = split(string(tvars[i]), specialrefstring)
 				thisvarname = splitstring[1]
-				thisvar = symbol(thisvarname)
+				thisvar = Symbol(thisvarname)
 				indices = Array(Any, length(splitstring) - 1)
 				for j = 2:length(splitstring)
 					indices[j - 1] = MetaProgTools.replacesymbol(parse(string("throwaway[", splitstring[j], "]")).args[2], :end, :(size($thisvar, $(j - 1))))#this throwaway[...] business is needed because parse("end") gives an error
@@ -52,7 +52,7 @@ macro assemblesparsematrix(vartuple, solutionsymbol, funcdef)
 	vars::Array{Symbol, 1}
 	f_pxdef = deepcopy(funcdef)
 	f_pxdeclaration = f_pxdef.args[1]
-	f_pxdeclaration.args[1] = symbol(string(f_pxdef.args[1].args[1], "_px"))
+	f_pxdeclaration.args[1] = Symbol(string(f_pxdef.args[1].args[1], "_px"))
 	f_pxdeclaration.args = [f_pxdef.args[1].args[1], solutionsymbol, f_pxdef.args[1].args[2:end]...]
 	f_pxdef.args[1] = f_pxdeclaration
 	f_pxbody = f_pxdef.args[2]

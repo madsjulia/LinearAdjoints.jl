@@ -13,7 +13,7 @@ function adjointvector(ex::Expr, vars, vectorsymbol)
 			if thisex.args[2] != :(0)
 				splitstring = split(string(tvars[i]), specialrefstring)
 				thisvarname = splitstring[1]
-				thisvar = symbol(thisvarname)
+				thisvar = Symbol(thisvarname)
 				indices = Array(Any, length(splitstring) - 1)
 				for j = 2:length(splitstring)
 					indices[j - 1] = MetaProgTools.replacesymbol(parse(string("throwaway[", splitstring[j], "]")).args[2], :end, :(size($thisvar, $(j - 1))))#this throwaway[...] business is needed because parse("end") gives an error
@@ -43,7 +43,7 @@ macro assemblevector(vartuple, vectorsymbol, funcdef)
 	vars::Array{Symbol, 1}
 	f_pdef = deepcopy(funcdef)
 	f_pdeclaration = f_pdef.args[1]
-	f_pdeclaration.args[1] = symbol(string(f_pdef.args[1].args[1], "_p"))
+	f_pdeclaration.args[1] = Symbol(string(f_pdef.args[1].args[1], "_p"))
 	f_pdef.args[1] = f_pdeclaration
 	f_pbody = f_pdef.args[2]
 	f_pbody = adjointvector(f_pbody, vars, vectorsymbol)
