@@ -39,8 +39,7 @@ function adjointvector(x, vars, vectorysmbol)
 end
 
 macro assemblevector(vartuple, vectorsymbol, funcdef)
-	vars = map(x->x, vartuple.args)#get it to give us a map of symbols
-	vars::Array{Symbol, 1}
+	local vars::Array{Symbol, 1} = map(x->x, vartuple.args)#get it to give us a map of symbols
 	f_pdef = deepcopy(funcdef)
 	f_pdeclaration = f_pdef.args[1]
 	f_pdeclaration.args[1] = Symbol(string(f_pdef.args[1].args[1], "_p"))
