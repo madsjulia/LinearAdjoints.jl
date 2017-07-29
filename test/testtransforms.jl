@@ -5,6 +5,6 @@ ex, vars = LinearAdjoints.transformrefs(utex, [:a, :b, :c])
 @test ex == testex
 @test vars == testvars
 @test utex == LinearAdjoints.untransformrefs(ex)
-@test LinearAdjoints.transformrefs(:(b[i, j + exp(k)]), [:b])[1] == symbol("b___laref___i___laref___j + exp(k)")
-@test LinearAdjoints.untransformrefs(symbol("b___laref___i___laref___j + exp(k)")) == :(b[i, j + exp(k)])
-@test LinearAdjoints.untransformrefs(symbol("b___laref___end + exp(k)")) == :(b[end + exp(k)])
+@test LinearAdjoints.transformrefs(:(b[i, j + exp(k)]), [:b])[1] == Symbol("b___laref___i___laref___j + exp(k)")
+@test LinearAdjoints.untransformrefs(Symbol("b___laref___i___laref___j + exp(k)")) == :(b[i, j + exp(k)])
+@test LinearAdjoints.untransformrefs(Symbol("b___laref___end + exp(k)")) == :(b[end + exp(k)])

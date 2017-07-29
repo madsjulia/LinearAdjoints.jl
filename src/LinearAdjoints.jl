@@ -41,29 +41,44 @@ function writegetlinearindex(vars::Vector)
 	return gli
 end
 
-macro solve(name, assemble_A_func_symbol, assemble_b_func_symbol)
+function setupbackslash(A)
+	Af = factorize(A)
+	function solve(b, transpose=false)
+		if transpose
+			return vec(Af' \ b)
+		else
+			return Af \ b
+		end
+	end
+end
+
+macro solve(name, assemble_A_func_symbol, assemble_b_func_symbol, setupsolver=:(LinearAdjoints.setupbackslash))
 	q = quote
 		function $name(args...)
 			A = $assemble_A_func_symbol(args...)
 			b = $assemble_b_func_symbol(args...)
+			solver = $setupsolver(A)
+			x = solver(b)
+			#=
 			Af = factorize(A)
 			x = Af \ b
+			=#
 			return x
 		end
 	end
 	return :($(esc(q)))
 end
 
-macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_symbol, objfunc_x_symbol, objfunc_p_symbol)
+macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_symbol, objfunc_x_symbol, objfunc_p_symbol, setupsolver=:(LinearAdjoints.setupbackslash))
 	if isa(objfunc_symbol, Symbol)#they want a gradient
 		q = quote
 			function $name(args...)
 				A = $assemble_A_func_symbol(args...)
 				b = $assemble_b_func_symbol(args...)
-				Af = factorize(A)
-				x = Af \ b
+				solver = $setupsolver(A)
+				x = solver(b)
 				g_x = $objfunc_x_symbol(x, args...)
-				lambda = vec(Af' \ g_x)
+				lambda = solver(g_x, true)
 				A_px = $(parse(string(assemble_A_func_symbol, "_px")))(x, args...)
 				b_p = $(parse(string(assemble_b_func_symbol, "_p")))(args...)
 				gradient = (b_p - A_px) * lambda + $objfunc_p_symbol(x, args...)
@@ -76,8 +91,8 @@ macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_symb
 			function $name(args...)
 				A = $assemble_A_func_symbol(args...)
 				b = $assemble_b_func_symbol(args...)
-				Af = factorize(A)
-				x = Af \ b
+				solver = $setupsolver(A)
+				x = solver(b)
 				gradients = Array(Array{Float64, 1}, $(length(objfunc_symbol.args)))
 				ofs = Array(Float64, $(length(objfunc_symbol.args)))
 				objfuncs = [$(objfunc_symbol.args...)]
@@ -85,7 +100,7 @@ macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_symb
 				objfunc_ps = [$(objfunc_p_symbol.args...)]
 				for i = 1:$(length(objfunc_symbol.args))
 					g_x = objfunc_xs[i](x, args...)
-					lambda = vec(Af' \ g_x)
+					lambda = solver(g_x, true)
 					A_px = $(parse(string(assemble_A_func_symbol, "_px")))(x, args...)
 					b_p = $(parse(string(assemble_b_func_symbol, "_p")))(args...)
 					gradient = (b_p - A_px) * lambda + objfunc_ps[i](x, args...)
