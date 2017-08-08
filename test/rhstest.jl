@@ -1,6 +1,6 @@
 @LinearAdjoints.assemblevector (a, c) b function f(a, c)
 	@assert length(a) == length(c)
-	b = Array(Float64, length(a))
+	b = Array{Float64}(length(a))
 	for i = 1:length(b)
 		b[i] = a[i] ^ 2 + exp(c[end - i + 1])
 	end

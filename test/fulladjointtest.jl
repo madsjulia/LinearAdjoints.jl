@@ -1,7 +1,7 @@
 import FDDerivatives
 @LinearAdjoints.assemblevector (k, f) b function rhs(k, f)
 	n = length(f)
-	b = Array(Float64, length(f))
+	b = Array{Float64}(length(f))
 	for i = 1:length(f)
 		b[i] = f[i] / n
 	end

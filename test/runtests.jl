@@ -40,7 +40,7 @@ end
 q = :(b[1] = a[1] ^ 2 + sqrt(c[end - 1 + 1]))
 q4 = quote
 	@LinearAdjoints.assemblevector (a, c) b function f(a, c)
-		b = Array(Float64, 1)
+		b = Array{Float64}(1)
 		$q
 		b[end] = 1
 		return b

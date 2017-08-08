@@ -22,7 +22,7 @@ function adjointsparsematrix(ex::Expr, vars, solutionsymbol)
 				splitstring = split(string(tvars[i]), specialrefstring)
 				thisvarname = splitstring[1]
 				thisvar = Symbol(thisvarname)
-				indices = Array(Any, length(splitstring) - 1)
+				indices = Array{Any}(length(splitstring) - 1)
 				for j = 2:length(splitstring)
 					indices[j - 1] = MetaProgTools.replacesymbol(parse(string("throwaway[", splitstring[j], "]")).args[2], :end, :(size($thisvar, $(j - 1))))#this throwaway[...] business is needed because parse("end") gives an error
 				end

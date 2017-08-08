@@ -93,8 +93,8 @@ macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_symb
 				b = $assemble_b_func_symbol(args...)
 				solver = $setupsolver(A)
 				x = solver(b)
-				gradients = Array(Array{Float64, 1}, $(length(objfunc_symbol.args)))
-				ofs = Array(Float64, $(length(objfunc_symbol.args)))
+				gradients = Array{Array{Float64, 1}}($(length(objfunc_symbol.args)))
+				ofs = Array{Float64}($(length(objfunc_symbol.args)))
 				objfuncs = [$(objfunc_symbol.args...)]
 				objfunc_xs = [$(objfunc_x_symbol.args...)]
 				objfunc_ps = [$(objfunc_p_symbol.args...)]
@@ -116,7 +116,7 @@ macro adjoint(name, assemble_A_func_symbol, assemble_b_func_symbol, objfunc_symb
 end
 
 function vectorargs2args(x, diffargs, args...)
-	thisargs = Array(Any, length(args))
+	thisargs = Array{Any}(length(args))
 	for i = 1:length(args)
 		thisargs[i] = deepcopy(args[i])
 	end
@@ -142,7 +142,7 @@ function args2vectorargs(diffargs, args...)
 			numparams += length(args[i])
 		end
 	end
-	x = Array(Float64, numparams)
+	x = Array{Float64}(numparams)
 	j = 1
 	for i = 1:length(args)
 		if diffargs[i]
