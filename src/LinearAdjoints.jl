@@ -163,7 +163,7 @@ function testassembleb_p(assembleb, assembleb_p, diffargs::Array{Bool, 1}, args.
 	@Base.Test.test size(fdb_p) == size(b_p)
 	for i = 1:size(fdb_p, 1)
 		for j = 1:size(fdb_p, 2)
-			@Base.Test.test_approx_eq_eps fdb_p[i, j] b_p[i, j] tol
+			@Base.Test.test fdb_p[i, j] ≈ b_p[i, j] atol=tol
 		end
 	end
 end
@@ -182,7 +182,7 @@ function testadjoint(adjointfunc, diffargs::Array{Bool, 1}, args...; tol=100*sqr
 	@Base.Test.test length(gradient) == length(fdgrad)
 	@Base.Test.test length(gradient) == length(x)
 	for i = 1:length(x)
-		@Base.Test.test_approx_eq_eps fdgrad[i] gradient[i] tol
+		@Base.Test.test fdgrad[i] ≈ gradient[i] atol=tol
 	end
 end
 
