@@ -48,7 +48,12 @@ end
 
 #the row of the A_px gives the paramter, the column gives the equation
 macro assemblesparsematrix(vartuple, solutionsymbol, funcdef)
-	local vars::Array{Symbol, 1} = map(x->x, vartuple.args)#get it to give us an array of symbols
+	local vars::Array{Symbol, 1}
+	if isa(vartuple, Symbol)
+		vars = Symbol[vartuple]
+	else
+		vars = map(x->x, vartuple.args)#get it to give us an array of symbols
+	end
 	f_pxdef = deepcopy(funcdef)
 	f_pxdeclaration = f_pxdef.args[1]
 	f_pxdeclaration.args[1] = Symbol(string(f_pxdef.args[1].args[1], "_px"))
