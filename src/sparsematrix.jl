@@ -46,7 +46,7 @@ function adjointsparsematrix(x, vars, solutionsymbol)
 	return x
 end
 
-#the row of the A_px gives the paramter, the column gives the equation
+#the row of the A_px gives the parameter, the column gives the equation
 macro assemblesparsematrix(vartuple, solutionsymbol, funcdef)
 	local vars::Array{Symbol, 1}
 	if isa(vartuple, Symbol)
