@@ -11,7 +11,7 @@ n = 10
 a = randn(n)
 c = randn(n)
 b = f(a, c)
-@test b == a .^ 2 + exp(reverse(c))
+@test b == a .^ 2 + exp.(reverse(c))
 b_p = f_p(a, c)
 trueb_p = zeros(2 * n, n)
 for i = 1:n
