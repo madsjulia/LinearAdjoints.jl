@@ -1,6 +1,6 @@
 module LinearAdjoints
 
-import Base.Test
+import Test
 import MetaProgTools
 import FDDerivatives
 
@@ -160,10 +160,10 @@ function testassembleb_p(assembleb, assembleb_p, diffargs::Array{Bool, 1}, args.
 	J = FDDerivatives.makejacobian(assembleb_pvectorargs)
 	fdassembleb_p(x) = J(x)'
 	fdb_p = fdassembleb_p(args2vectorargs(diffargs, args...))
-	@Base.Test.test size(fdb_p) == size(b_p)
+	@Test.test size(fdb_p) == size(b_p)
 	for i = 1:size(fdb_p, 1)
 		for j = 1:size(fdb_p, 2)
-			@Base.Test.test fdb_p[i, j] ≈ b_p[i, j] atol=tol
+			@Test.test fdb_p[i, j] ≈ b_p[i, j] atol=tol
 		end
 	end
 end
@@ -179,10 +179,10 @@ function testadjoint(adjointfunc, diffargs::Array{Bool, 1}, args...; tol=100*sqr
 	fdgradient = FDDerivatives.makegradient(ofwithvectorargs)
 	x = args2vectorargs(diffargs, args...)
 	fdgrad = fdgradient(x)
-	@Base.Test.test length(gradient) == length(fdgrad)
-	@Base.Test.test length(gradient) == length(x)
+	@Test.test length(gradient) == length(fdgrad)
+	@Test.test length(gradient) == length(x)
 	for i = 1:length(x)
-		@Base.Test.test fdgrad[i] ≈ gradient[i] atol=tol
+		@Test.test fdgrad[i] ≈ gradient[i] atol=tol
 	end
 end
 
