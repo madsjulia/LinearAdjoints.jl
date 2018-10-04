@@ -22,9 +22,9 @@ function adjointsparsematrix(ex::Expr, vars, solutionsymbol)
 				splitstring = split(string(tvars[i]), specialrefstring)
 				thisvarname = splitstring[1]
 				thisvar = Symbol(thisvarname)
-				indices = Array{Any}(length(splitstring) - 1)
+				indices = Array{Any}(undef, length(splitstring) - 1)
 				for j = 2:length(splitstring)
-					indices[j - 1] = MetaProgTools.replacesymbol(parse(string("throwaway[", splitstring[j], "]")).args[2], :end, :(size($thisvar, $(j - 1))))#this throwaway[...] business is needed because parse("end") gives an error
+					indices[j - 1] = MetaProgTools.replacesymbol(Meta.parse(string("throwaway[", splitstring[j], "]")).args[2], :end, :(size($thisvar, $(j - 1))))#this throwaway[...] business is needed because parse("end") gives an error
 				end
 				thisex.args[5] = :(getlinearindex($(Val{thisvar}), $(indices...)))
 				push!(code.args, thisex)
@@ -36,7 +36,7 @@ function adjointsparsematrix(ex::Expr, vars, solutionsymbol)
 		for var in vars
 			push!(numrowsexp.args, :(length($var)))
 		end
-		return :(return sparse($specialsymbolI, $specialsymbolJ, $specialsymbolV, $numrowsexp, length($solutionsymbol)))
+		return :(return SparseArrays.sparse($specialsymbolI, $specialsymbolJ, $specialsymbolV, $numrowsexp, length($solutionsymbol)))
 	else
 		return Expr(ex.head, map(x->adjointsparsematrix(x, vars, solutionsymbol), ex.args)...)
 	end

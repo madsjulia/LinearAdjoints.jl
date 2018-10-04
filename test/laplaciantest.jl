@@ -1,3 +1,4 @@
+import SparseArrays
 @LinearAdjoints.assemblesparsematrix (k,) x function laplacian(k, n)
 	I = Int[]
 	J = Int[]
@@ -8,11 +9,11 @@
 		LinearAdjoints.addentry(I, J, V, i, i + 1, 1 * k)
 	end
 	LinearAdjoints.addentry(I, J, V, n, n, -2 * k)
-	return sparse(I, J, V)
+	return SparseArrays.sparse(I, J, V)
 end
 n = 10
 A = laplacian(pi, n)
-@test A == spdiagm((fill(pi, n - 1), fill(-2 * pi, n), fill(pi, n - 1)), (-1, 0, 1))
+@test A == SparseArrays.spdiagm(-1=>fill(pi, n - 1), 0=>fill(-2 * pi, n), 1=>fill(pi, n - 1))
 x = rand(10)
 A_px = laplacian_px(x, pi, n)
 @test A_px[1, 1] == -2 * x[1] + x[2]

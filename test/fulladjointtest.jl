@@ -1,7 +1,8 @@
 import FDDerivatives
+import SparseArrays
 @LinearAdjoints.assemblevector (k, f) b function rhs(k, f)
 	n = length(f)
-	b = Array{Float64}(length(f))
+	b = Array{Float64}(undef, length(f))
 	for i = 1:length(f)
 		b[i] = f[i] / n
 	end
@@ -19,11 +20,11 @@ end
 		LinearAdjoints.addentry(I, J, V, i, i + 1, k / dx)
 	end
 	LinearAdjoints.addentry(I, J, V, n, n, -2 * k / dx)
-	return sparse(I, J, V)
+	return SparseArrays.sparse(I, J, V)
 end
 const k0 = float(pi)
 n = 10
-xs = linspace(0, 1, n + 2)[2:end - 1]
+xs = range(0; stop=1, length=n + 2)[2:end - 1]
 const hobs = randn(length(xs))
 function objfunc(h, k, f)
 	return sum((h - hobs) .^ 2) + (k - k0) ^ 2

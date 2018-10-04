@@ -11,7 +11,7 @@ function transformrefs(ex::Expr, vars::Array{Symbol, 1})
 	else
 		x = map(arg->transformrefs(arg, vars), ex.args)
 		transformedargs = map(x->x[1], x)
-		syms = reduce((x, y)->unique([x; y]), Symbol[], map(x->x[2], x))
+		syms = reduce((x, y)->unique([x; y]), map(x->x[2], x); init=Symbol[])
 		return Expr(ex.head, transformedargs...), syms
 	end
 end
@@ -30,9 +30,9 @@ end
 
 function untransformrefs(x::Symbol)
 	sx = string(x)
-	if contains(sx, specialrefstring)
+	if occursin(specialrefstring, sx)
 		splitsx = split(sx, specialrefstring)
-		return parse(string(splitsx[1], "[", join(splitsx[2:end], ", ")..., "]"))
+		return Meta.parse(string(splitsx[1], "[", join(splitsx[2:end], ", ")..., "]"))
 	else
 		return x
 	end

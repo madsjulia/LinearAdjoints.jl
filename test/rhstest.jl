@@ -1,6 +1,6 @@
 @LinearAdjoints.assemblevector (a, c) b function f(a, c)
 	@assert length(a) == length(c)
-	b = Array{Float64}(length(a))
+	b = Array{Float64}(undef, length(a))
 	for i = 1:length(b)
 		b[i] = a[i] ^ 2 + exp(c[end - i + 1])
 	end
@@ -18,4 +18,4 @@ for i = 1:n
 	trueb_p[i, i] = 2 * a[i]
 	trueb_p[n + i, n - i + 1] = exp(c[i])
 end
-@test full(b_p) == trueb_p
+@test Matrix(b_p) == trueb_p
