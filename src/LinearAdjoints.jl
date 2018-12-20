@@ -22,18 +22,20 @@ function writegetlinearindex(vars::Vector)
 		for j = 1:i - 1
 			priorlengthexpression = :($priorlengthexpression + length($(vars[j])))
 		end
+		indexvar1 = gensym()
+		indexvar2 = gensym()
 		q = quote
 			function getlinearindex(::Type{$(Val{vars[i]})})
 				return $priorlengthexpression + 1
 			end
 			function getlinearindex(::Type{$(Val{vars[i]})}, indices...)
 				linearindex = $priorlengthexpression + 1
-				for i = 1:length(indices)
+				for $indexvar1 = 1:length(indices)
 					offset = 1
-					for j = 1:i - 1
-						offset *= size($(vars[i]), j)
+					for $indexvar2 = 1:$indexvar1 - 1
+						offset *= size($(vars[i]), $indexvar2)
 					end
-					linearindex += (indices[i] - 1) * offset
+					linearindex += (indices[$indexvar1] - 1) * offset
 				end
 				return linearindex
 			end
