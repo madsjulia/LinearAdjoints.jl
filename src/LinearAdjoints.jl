@@ -1,7 +1,8 @@
 module LinearAdjoints
 
 import Test
-import FDDerivatives
+import GeostatInversion
+FDDerivatives = GeostatInversion.FDDerivatives
 import LinearAlgebra
 import MetaProgTools
 import SparseArrays
