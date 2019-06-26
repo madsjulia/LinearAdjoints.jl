@@ -1,5 +1,5 @@
-name = "LinearAdjoints.jl"
-uuid = "5fa0d9b6-9846-11e9-3ac0-81810844c310"
+name = "LinearAdjoints"
+uuid = "3201237a-9847-11e9-0d2a-6d530c977506"
 authors = ["Daniel O'Malley <omalled@lanl.gov>"]
 version = "0.1.0"
 
