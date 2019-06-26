@@ -1,3 +1,8 @@
+name = "LinearAdjoints.jl"
+uuid = "5fa0d9b6-9846-11e9-3ac0-81810844c310"
+authors = ["Daniel O'Malley <omalled@lanl.gov>"]
+version = "0.1.0"
+
 [deps]
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 GeostatInversion = "acd30bff-8734-59b1-86d1-c3ef2efb63d6"
