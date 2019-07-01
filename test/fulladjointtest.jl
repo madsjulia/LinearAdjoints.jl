@@ -1,4 +1,5 @@
-import FDDerivatives
+import GeostatInversion
+FDDerivatives = GeostatInversion.FDDerivatives
 import SparseArrays
 
 @LinearAdjoints.assemblevector (k, f) b function rhs(k, f)
