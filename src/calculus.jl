@@ -15,5 +15,6 @@ function differentiate(ex::Expr,wrt)
 	elseif ex.head != :call
 		error("Unrecognized expression $ex")
 	end
-	Calculus.simplify(differentiate(Calculus.SymbolParameter(ex.args[1]), ex.args[2:end], wrt))
+	#Calculus.simplify(differentiate(Calculus.SymbolParameter(ex.args[1]), ex.args[2:end], wrt))
+	differentiate(Calculus.SymbolParameter(ex.args[1]), ex.args[2:end], wrt)
 end
