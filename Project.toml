@@ -1,7 +1,7 @@
 name = "LinearAdjoints"
 uuid = "15eb0ba9-8092-56af-9473-024e039f0e65"
 authors = ["Daniel O'Malley <omalled@lanl.gov>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
